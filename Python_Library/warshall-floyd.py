@@ -1,73 +1,33 @@
+V, E = map(int, input().split()) # グラフGの頂点の数|V|，辺の数|E|の受け取り
+
+"""
+Input:
+    - グラフGの隣接行列dist
+Description:
+    重み付き有向グラフdist(V,E)について，全点対間最短経路の距離を求める
+    ワ―シャルフロイド法
+"""
 def warshall_floyd(dist):
-    """ワーシャルフロイド法 (Warshall-Floyd Algorithm)
-    全点対最短経路問題(APSP)を解くアルゴリズム。グラフG=(V,E)の全てのペア(v,w)間の最短経路コストを求める。
-    計算量　O(|V|^3)
-    """
-    V = len(dist)
-    for k in range(V):
-        for i in range(V):
-            for j in range(V):
-                # 頂点の全ての組(i,j)について上書きしても不都合はない
-                dist[i][j] = min(dist[i][j],dist[i][k]+dist[k][j])
+    V = len(dist)  # 頂点の個数（隣接行列の長さ）
+    for k in range(V):  # 経由点k=0からV-1まで繰り返す
+        for i in range(V):  # 始点i=0からV-1まで繰り返す
+            for j in range(V):  # 終点j=0からV-1まで繰り返す
+                dist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j]) # i→k→jという経路の重みが，dist[i][j]よりも小さければ更新する
+    return  # 処理を終了する
 
-h,w = map(int,input().split())
-c = [list(map(int,input().split())) for _ in range(10)]
-warshall_floyd(c)
-A = [list(map(int,input().split())) for _ in range(h)]
-ans = 0
-for i in range(h):
-    for j in range(w):
-        if A[i][j] != -1:
-            ans += c[A[i][j]][1]
-print(ans)
-
-
-# --------------------------------------------------------------------
-
-# ABC151D
-h,w = map(int,input().split())
-l = [['#']*(w+2)]
-for i in range(h):
-    l.append(['#']+list(input())+['#'])
-l.append(['#']*(w+2))
-
-def id(x,y):
-    return x*w+y
-
-INF = 1<<29
-dp = [[INF]*500 for _ in range(500)]
-for i in range(500):
-    dp[i][i] = 0
-
-
-ans = 0
-directions = [(1,0),(0,1),(-1,0),(0,-1)]
-
-for i in range(1,h+1):
-    for j in range(1,w+1):
-        if l[i][j]=='#':
-            continue
-        for dir in directions:
-            ni = i+dir[0]
-            nj = j+dir[1]
-            if l[ni][nj] == '#':
-                continue
-            dp[id(i-1,j-1)][id(ni-1,nj-1)] = 1
-            dp[id(ni-1,nj-1)][id(i-1,j-1)] = 1
-
-for k in range(h*w):
-    for i in range(h*w):
-        for j in range(h*w):
-            dp[i][j] = min(dp[i][j],dp[i][k]+dp[k][j])
-
-ans = 0
-for si in range(h):
-    for sj in range(w):
-        if l[si+1][sj+1] == '#':
-            continue
-        for gi in range(h):
-            for gj in range(w):
-                if l[gi+1][gj+1] == '#':
-                    continue
-                ans = max(ans,dp[id(si,sj)][id(gi,gj)])
-print(ans)
+dist = [[float('inf')]*V for _ in range(V)] # グラフGの隣接行列（∞は経路が存在しない）
+for i in range(E):  # 辺の数の回数だけ
+    s, t, d = map(int, input().split()) # 2頂点s，tとそれを結ぶ辺の重みdの受け取り
+    dist[s][t] = d  # 頂点sから頂点tへの最短経路（辺）の重みはd
+for i in range(V):  # 全ての頂点について
+    dist[i][i] = 0  # 自分から自分への最短経路を0で初期化
+    
+warshall_floyd(dist)    # 全点対間最短経路の距離を求める
+if any([dist[i][i] for i in range(V)]): # 閉路の重みの総和が0となる場合
+    print('NEGATIVE CYCLE') # 'NEGATIVE CYCLE'と出力する
+    exit()  # プログラムを終了する
+for i in range(V):  # 始点i=0からV-1まで繰り返す
+    for j in range(V):  # 終点j=0からV-1まで繰り返す
+        if dist[i][j] == float('inf'):  # 頂点iから頂点jへの経路が存在しない場合
+            dist[i][j] = 'INF'  # 'INF'を出力
+        print(dist[i][j], end=' ' if j!= V-1 else '\n') #  # 頂点iから頂点jへの最短経路を出力する
