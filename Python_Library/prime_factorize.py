@@ -21,6 +21,15 @@ def prime_factorize(n):
 # 素数pを渡すと[[p,1]]
 # 24を渡すと[[2,3], [3,1]]
 
+def get_divisor_num(n):
+    if n == 1:
+        return 1
+    arr = prime_factorize(n)
+    num = 1
+    for base, exponent in arr:
+        num *= (exponent + 1)
+    return num
+
 # --------------------------------------------------
 
 from math import sqrt
